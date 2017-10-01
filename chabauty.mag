@@ -1,3 +1,25 @@
+//////////////////////////////////////////////////////////////////////
+//
+// chabauty.mag
+// Authors: Maarten Derickx, Solomon Vishkautsan, 1 October 2017
+//
+// Online at:
+//	https://github.com/wishcow79/chabauty/blob/master/chabauty.mag
+// A file of examples is at
+//	https://github.com/wishcow79/chabauty/blob/master/chabauty_tests.mag
+// 
+// 
+//	Chabauty package
+//	======================================================
+//	An implementation of the Chabauty-Coleman algorithm for
+//      curves of genus g >= 2.
+//	The algorithm is based on examples by Michael Stoll,
+//	esp. as in article "Rational 6-cycles under iteration of 
+//	quadratic polynomials".
+// 
+//////////////////////////////////////////////////////////////////////
+
+
 function ReduceCurveModp(C,p)
     assert IsCurve(C);
     assert IsPrime(p);
