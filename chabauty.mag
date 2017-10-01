@@ -352,7 +352,7 @@ function MapsJknownToJp(C, pts, GoodPrimes)
 end function;
 
 function JacobianRankUpperBound(C, pts, GoodPrimes : NormBound := 50)
-    principal_gens := PrincipalGenerators(C, pts, GoodPrimes);
+    principal_gens := PrincipalGenerators(C, pts, GoodPrimes : NormBound := NormBound);
 				 
     return #pts - #principal_gens - 1, principal_gens;
 end function;
