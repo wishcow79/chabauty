@@ -1,4 +1,7 @@
-function ReduceRationalFunctionModp(f,p)
+Attach("remove_pcontent.m")
+
+intrinsic ReduceRationalFunctionModp(f::FldFunFracSchElt,p::RngIntElt) -> FldFunFracSchElt
+{ Reduce rational function element of function field modulo p }
     assert IsPrime(p);
 
     FF := Parent(f);
@@ -69,4 +72,4 @@ function ReduceRationalFunctionModp(f,p)
     end if;
 
     return FFp ! (Evaluate((coeff5 * num5p), a) / Evaluate(den5p,a));
-end function;
+end intrinsic;
