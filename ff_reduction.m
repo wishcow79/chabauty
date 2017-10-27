@@ -46,10 +46,10 @@ intrinsic ReduceRationalFunctionModp(f::FldFunFracSchElt,p::RngIntElt) -> FldFun
 
     // if we can't fix the numerator then we will never be able to fix either the denominator
     // or the bad coefficient.
-    if not num4p in Ip then 
+    if not num4p in Ip then
         error "Error in reducing rational function. Nothing we can do to fix p in denominator.";
     end if;
-    
+
     num5, coeff_num5 := RemovePContentModI(num4, p, IZsat);
 
     if den4p in Ip then

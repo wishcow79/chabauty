@@ -4,19 +4,19 @@
 // Authors: Maarten Derickx, Solomon Vishkautsan, 1 October 2017
 //
 // Online at:
-//	https://github.com/wishcow79/chabauty/blob/master/chabauty.mag
+//  https://github.com/wishcow79/chabauty/blob/master/chabauty.mag
 // A file of examples is at
-//	https://github.com/wishcow79/chabauty/blob/master/chabauty_tests.mag
-// 
-// 
-//	Chabauty package
-//	======================================================
-//	An implementation of the Chabauty-Coleman algorithm for
+//  https://github.com/wishcow79/chabauty/blob/master/chabauty_tests.mag
+//
+//
+//  Chabauty package
+//  ======================================================
+//  An implementation of the Chabauty-Coleman algorithm for
 //      curves of genus g >= 2.
-//	The algorithm is based on examples by Michael Stoll,
-//	esp. as in article "Rational 6-cycles under iteration of 
-//	quadratic polynomials".
-// 
+//  The algorithm is based on examples by Michael Stoll,
+//  esp. as in article "Rational 6-cycles under iteration of
+//  quadratic polynomials".
+//
 //////////////////////////////////////////////////////////////////////
 
 
@@ -24,13 +24,13 @@ function ReduceCurveModp(C,p)
     assert IsCurve(C);
     assert IsPrime(p);
 
-    if "Cp" in GetAttributes(Type(C)) and 
+    if "Cp" in GetAttributes(Type(C)) and
         assigned C`Cp and
         IsDefined(C`Cp, p) then
             return C`Cp[p];
     end if;
 
-    if not "UseReduction" in GetAttributes(Type(C)) or 
+    if not "UseReduction" in GetAttributes(Type(C)) or
         not assigned C`UseReduction or C`UseReduction then
         Cp := Curve(Reduction(C, p));
     else
@@ -39,9 +39,9 @@ function ReduceCurveModp(C,p)
             Cp := Curve(S);
         else
             error "reduction modulo p is not a curve.";
-        end if;        
+        end if;
     end if;
-    
+
     if not "Cp" in GetAttributes(Type(C)) then
         AddAttribute(Type(C), "Cp");
     end if;
@@ -60,7 +60,7 @@ function CleanCurveEqs(C)
     eqseq := [ClearDenominators(e) : e in eqs];
     D := Curve(AmbientSpace(C), eqseq);
 
-    // TODO: decide about saturation of curve    
+    // TODO: decide about saturation of curve
     if not IsSaturated(D) then
         Saturate(~D);
     end if;
@@ -122,11 +122,11 @@ function PrimesOfBadReduction(C)
 
     ambientC := AmbientSpace(C);
     dimC := Dimension(ambientC);
-    
+
     definingC := DefiningEquations(C);
     definingC := [ClearDenominators(q) : q in definingC];
     PZ<[a]> := PolynomialRing(Integers(), dimC);
-    
+
     // for each standard affine patch generate the elimination ideal
     eqnss := [[Evaluate(q, a[1..j-1] cat [1] cat a[j..dimC]) : q in definingC] : j in [1..(dimC+1)]];
     reslist := [];
@@ -142,7 +142,7 @@ function PrimesOfBadReduction(C)
     return badprimes;
 end function;
 
-function IsPrimeOfBadReduction(C,p)   
+function IsPrimeOfBadReduction(C,p)
     try
         Cp := ReduceCurveModp(C, p);
         FF := FunctionField(Cp);
@@ -151,12 +151,12 @@ function IsPrimeOfBadReduction(C,p)
     end try;
     return not IsNonsingular(Cp);
 end function;
-    
+
 function FindGoodPrimes(C, ngp)
     p := 3;
     good_primes := [];
     while #good_primes lt ngp do
-        if not IsPrimeOfBadReduction(C,p) then 
+        if not IsPrimeOfBadReduction(C,p) then
             Append(~good_primes, p);
         end if;
         p := NextPrime(p);
@@ -164,7 +164,7 @@ function FindGoodPrimes(C, ngp)
     return good_primes;
 end function;
 
-function GetClassGroupModp(C, p)    
+function GetClassGroupModp(C, p)
     Cp := ReduceCurveModp(C,p);
     Clp, fromClp, toClp := ClassGroup(Cp);
 
@@ -174,12 +174,12 @@ end function;
 function GetClGrpProd(C, GoodPrimes)
     // We cache the class group product in the curve C's attributes
 
-    if "ClGrpProd" in GetAttributes(Type(C)) and 
+    if "ClGrpProd" in GetAttributes(Type(C)) and
         assigned C`ClGrpProd and
         IsDefined(C`ClGrpProd, GoodPrimes) then
             return Explode(C`ClGrpProd[GoodPrimes]);
     end if;
-  
+
     if not "ClGrpProd" in GetAttributes(Type(C)) then
         AddAttribute(Type(C), "ClGrpProd");
     end if;
@@ -206,22 +206,22 @@ function MapFAtoClProd(C, pts, GoodPrimes)
     Clprod, injs, projs := GetClGrpProd(C, GoodPrimes);
 
     imgs := [*
-             [toClp(Divisor(Place(pt))) 
-                 where Clp, fromClp, toClp := Explode(GetClassGroupModp(C,p)): 
-                 pt in ReducePointsModp(pts, p)] : 
+             [toClp(Divisor(Place(pt)))
+                 where Clp, fromClp, toClp := Explode(GetClassGroupModp(C,p)):
+                 pt in ReducePointsModp(pts, p)] :
              p in GoodPrimes
             *];
 
     FA := FreeAbelianGroup(#pts);
-    FAtoClprod := hom<FA -> Clprod | [&+[injs[i](imgs[i][j]) : 
-                                            i in [1..#GoodPrimes]]: 
+    FAtoClprod := hom<FA -> Clprod | [&+[injs[i](imgs[i][j]) :
+                                            i in [1..#GoodPrimes]]:
                                             j in [1..#pts]]>;
 
     return FAtoClprod;
 end function;
 
 function RationalPointsModp(C, p)
-    if "rat_pts_mod_p" in GetAttributes(Type(C)) and 
+    if "rat_pts_mod_p" in GetAttributes(Type(C)) and
         assigned C`rat_pts_mod_p and
         IsDefined(C`rat_pts_mod_p, p) then
             return C`rat_pts_mod_p[p];
@@ -285,14 +285,14 @@ end function;
 function JacobianTorsionBound(C, pts, GoodPrimes)
     /* Find torsion bound for Jacobian */
     // Get upper bound for torsion structure
-    // (do not use reduction mod 2, since 2-torsion may not map injectively)    
+    // (do not use reduction mod 2, since 2-torsion may not map injectively)
     ClgrpsWithMaps := [GetClassGroupModp(C,p) : p in GoodPrimes | p ne 2];
     Clgrps := [Cl[1] : Cl in ClgrpsWithMaps];
     invs := [[i : i in Invariants(Cl) | i ne 0] : Cl in Clgrps];
     tors_bound := [GCD([#seq gt j select seq[#seq-j] else 1 : seq in invs])
                  : j in [Max([#seq : seq in invs])-1..0 by -1]];
     tors_bound := [i : i in tors_bound | i gt 1];
-    
+
     return tors_bound;
 end function;
 
@@ -302,7 +302,7 @@ function JacobianRankLowerBound(C, pts, GoodPrimes)
     FAtoClprod := MapFAtoClProd(C, pts, GoodPrimes);
 
     imFAtoClprod := Image(FAtoClprod);
-    iminvs := Invariants(imFAtoClprod);    
+    iminvs := Invariants(imFAtoClprod);
     iminvs := [inv : inv in iminvs | inv ne 0];
 
     i := 1;
@@ -310,16 +310,16 @@ function JacobianRankLowerBound(C, pts, GoodPrimes)
         total_tors_bound := &*tors_bound;
         while i le #iminvs do
             boo := IsDivisibleBy(total_tors_bound, iminvs[i]);
-            if not boo then 
+            if not boo then
                 break;
             end if;
             i := i + 1;
         end while;
     end if;
-    
+
     if i gt #iminvs then
         return 0;
-    else 
+    else
         return #iminvs - i + 1;
     end if;
 end function;
@@ -327,11 +327,11 @@ end function;
 function PrincipalGenerators(C, pts, GoodPrimes : NormBound := 50)
     FAtoClprod := MapFAtoClProd(C, pts, GoodPrimes);
     ker := Kernel(FAtoClprod);
-    
+
     kerlat := Lattice(Matrix([Eltseq(Domain(FAtoClprod)!b) : b in OrderedGenerators(ker)]));
     basis := Basis(LLL(kerlat));
     small_basis := [b : b in basis | Norm(b) le NormBound];
-    
+
     rels := [&+[b[i]*Place(pts[i]) : i in [1..#pts]] : b in small_basis];
     principal_gens := [small_basis[i] : i in [1..#rels]| IsPrincipal(rels[i])];
 
@@ -375,7 +375,7 @@ end function;
 
 function JacobianRankUpperBound(C, pts, GoodPrimes : NormBound := 50)
     principal_gens := PrincipalGenerators(C, pts, GoodPrimes : NormBound := NormBound);
-				 
+
     return #pts - #principal_gens - 1, principal_gens;
 end function;
 
@@ -419,7 +419,7 @@ function RemovePContentModI(F, p, I)
 end function;
 
 function SaturatedIdealOfCurveAtPrime(C,p)
-    if "SaturatedIdeal" in GetAttributes(Type(C)) and 
+    if "SaturatedIdeal" in GetAttributes(Type(C)) and
         assigned C`SaturatedIdeal and
         IsDefined(C`SaturatedIdeal, p) then
             return C`SaturatedIdeal[p];
@@ -519,10 +519,10 @@ function ReduceRationalFunctionModp(f,p)
 
     // if we can't fix the numerator then we will never be able to fix either the denominator
     // or the bad coefficient.
-    if not num4p in Ip then 
+    if not num4p in Ip then
         error "Error in reducing rational function. Nothing we can do to fix p in denominator.";
     end if;
-    
+
     num5, coeff_num5 := RemovePContentModI(num4, p, IZsat);
 
     if den4p in Ip then
@@ -550,15 +550,15 @@ end function;
 // function LiftRationalFunction(f, C)
 //     // lift rational function to a rational function on the curve C
 //     FF<[x]> := FunctionField(C);
-//     dim := Dimension(AmbientSpace(C));    
+//     dim := Dimension(AmbientSpace(C));
 //     R<[a]> := PolynomialRing(BaseRing(C), dim);
-    
+
 //     N := Numerator(f);
-//     coeffs_N := ChangeUniverse(Eltseq(Coefficients(N)), Integers());    
+//     coeffs_N := ChangeUniverse(Eltseq(Coefficients(N)), Integers());
 //     N_lift := Polynomial(coeffs_N,[Monomial(R, Exponents(m)) : m in Monomials(N)]);
 
 //     D := Denominator(f);
-//     coeffs_D := ChangeUniverse(Eltseq(Coefficients(D)), Integers()); 
+//     coeffs_D := ChangeUniverse(Eltseq(Coefficients(D)), Integers());
 //     D_lift := Polynomial(coeffs_D,[Monomial(R, Exponents(m)) : m in Monomials(D)]);
 
 //     f_lift := Evaluate(N_lift/D_lift,x);
@@ -593,10 +593,10 @@ procedure PrintKernelModp(ker_basis, p)
 end procedure;
 
 function GetKernelModp(C, pts, p, ker_basis)
-    // We take the kernel of FA->Pic(Q) and complete 
+    // We take the kernel of FA->Pic(Q) and complete
     // to a basis of the kernel of reduction mod p from FA->Pic(F_p),
     // up to a finite index.
-    // The extra vectors map into a finite index subgroup 
+    // The extra vectors map into a finite index subgroup
     // of the kernel of Pic(Q)->Pic(F_p)
     assert p gt 2;
     pts_p := ReducePointsModp(pts, p);
@@ -606,8 +606,8 @@ function GetKernelModp(C, pts, p, ker_basis)
 
     FA := FreeAbelianGroup(#pts);
     hom_p := hom<FA -> Cl_p | [Divisor(Place(Curve(Codomain(fromCl_p)) ! Eltseq(pt))) @@ fromCl_p : pt in pts_p]>;
-                                   
-//    homs := [hom<FA -> Cls[i] | [Divisor(Place(pt)) @@ fromCls[i] 
+
+//    homs := [hom<FA -> Cls[i] | [Divisor(Place(pt)) @@ fromCls[i]
 //                                   : pt in ptsred[i]]>  : i in [1..#Cls]];
 
 
@@ -643,7 +643,7 @@ function GetKernelModp(C, pts, p, ker_basis)
     idx_ker_p := [i : i in [1..#small_basis] | not IsPrincipal(divs_p[i])];
     small_basis := [small_basis[i] : i in idx_ker_p];
     divs_p := [divs_p[i] : i in idx_ker_p];
-    
+
     divs_p_reduced := [];
     small_basis_reduced := [];
     for i in [1..#divs_p] do
@@ -658,9 +658,9 @@ function GetKernelModp(C, pts, p, ker_basis)
     end for;
     divs_p := divs_p_reduced;
     small_basis := small_basis_reduced;
-    
-    assert mPic(sub<FA | small_basis>) eq mPic(ker_p);    
-    
+
+    assert mPic(sub<FA | small_basis>) eq mPic(ker_p);
+
     return small_basis;
 */
 end function;
@@ -684,7 +684,7 @@ function GetCharpols(ker_basis, pts, basept, uni, p)
     for charpol in charpols do
         coeffs_charpol := Coefficients(charpol);
         try
-            assert forall{c : c in coeffs_charpol[1..(#coeffs_charpol-1)]| Valuation(c, p) gt 0};                            
+            assert forall{c : c in coeffs_charpol[1..(#coeffs_charpol-1)]| Valuation(c, p) gt 0};
         catch e
             print "ERROR: charpol does not reduce to t^n mod p.";
             print "Charpol = ", charpol;
@@ -702,25 +702,25 @@ function IsGoodUniformizer(u, basept, p)
     C := Curve(basept);
     Cp := ReduceCurveModp(C,p);
     up := ReduceRationalFunctionModp(u, p);
-    
+
     vp := Valuation(up, Cp ! Eltseq(ReducePointModp(basept,p)));
     if v eq 1 and vp eq 1 then
         return true;
-    else 
+    else
         return false;
     end if;
 end function;
 
 
-// function GetGoodUniformizer2(basept, p)    
+// function GetGoodUniformizer2(basept, p)
 //     C := Curve(basept);
 //     dim := Dimension(AmbientSpace(C));
 //     Cp := ReduceCurveModp(C,p);
-    
+
 //     FF<[x]> := FunctionField(C);
 //     FFp<[b]> := FunctionField(Cp);
 //     PolQ<[a]> := PolynomialRing(BaseRing(C), dim);
-    
+
 //     // we reduce the basept modulo p
 //     basept_seq := Eltseq(basept);
 //     basept_seq := [basept_seq[i]*d where d := LCM([Denominator(basept_seq[j]) : j in [1..dim+1]]): i in [1..dim+1]];
@@ -730,26 +730,26 @@ end function;
 //     // we start with a uniformizer u1 at the basept and reduce it modulo p
 //     // but first we replace u1 with a function that can be reduced mod p
 //     u1 := UniformizingParameter(basept);
-//     N := Evaluate(Numerator(u1), a);    
+//     N := Evaluate(Numerator(u1), a);
 //     D := Evaluate(Denominator(u1), a);
 //     N, L1 := ClearDenominators(N);
 //     D, L2 := ClearDenominators(D);
 //     N := N / GCD(ChangeUniverse(Coefficients(N), Integers()));
 //     D := D / GCD(ChangeUniverse(Coefficients(D), Integers()));
-//     u1 := Evaluate(N/D, x); 
+//     u1 := Evaluate(N/D, x);
 //     // sanity check::: we make sure u1 is still a uniformizer:
 //     assert Valuation(u1, basept) eq 1;
-    
+
 //     // we reduce the uniformizer u1 mod p
 //     u1modp := ReduceRationalFunction(u1, Cp);
-    
+
 //     // if u1modp is a uniformizer at the reduction of the basept then we are done
 //     v1 := Valuation(u1modp, basept_modp);
 //     if v1 eq 1 then
 //         vprint User1: "Reduction of u1 is a uniformizer";
 //         return u1;
 //     end if;
-    
+
 //     // We now have the situation where u1modp is not a uniformizer at basept_modp.
 //     // We take a uniformizer at basept_modp and lift it to a rational function on C
 //     u2modp := UniformizingParameter(basept_modp);
@@ -761,14 +761,14 @@ end function;
 //         assert Valuation(ReduceRationalFunction(u2, Cp), basept_modp) eq 1;
 //         return u2;
 //     end if;
-    
+
 //     if v2 gt 1 then
 //         u3 := p*u1+u2;
 //     else
 //         // we get here only if v2 is now < 0
 //         u3 := 1/(p/u1 + 1/u2);
 //     end if;
-        
+
 //     // sanity check:::
 //     assert Valuation(u3, basept) eq 1;
 //     assert Valuation(ReduceRationalFunction(u3, Cp), basept_modp) eq 1;
@@ -785,7 +785,7 @@ function GetGoodUniformizer(basept, p)
     FF<[x]> := FunctionField(C);
     FFp<[b]> := FunctionField(Cp);
     PolQ<[a]> := PolynomialRing(BaseRing(C), dim);
-    
+
     // we reduce the basept modulo p
     basept_seq := Eltseq(basept);
     basept_seq := [basept_seq[i]*d where d := LCM([Denominator(basept_seq[j]) : j in [1..dim+1]]): i in [1..dim+1]];
@@ -828,10 +828,10 @@ function GetGoodUniformizer(basept, p)
     // clear p-powers from numerator and denominator
     /*
     N := Numerator(uni);
-    coeffs_N := Coefficients(N);  
+    coeffs_N := Coefficients(N);
     minN := Min([Valuation(c,p) : c in coeffs_N]);
     D := Denominator(uni);
-    coeffs_D := Coefficients(D);  
+    coeffs_D := Coefficients(D);
     minD := Min([Valuation(c,p) : c in coeffs_D]);
     uni := (FF ! (N / p^minN)) / (FF ! (D / p^minD));
     */
@@ -859,7 +859,7 @@ end function;
 
 procedure PrintKillingBasis(killing_basis, DiffForms, p, pAdicPrecision)
     printf "Basis of forms killing J_1 when reduced modulo p^%o:\n",pAdicPrecision;
-    
+
     for i := 1 to #killing_basis do
       start := true;
       printf "    ";
@@ -878,14 +878,14 @@ procedure PrintKillingBasis(killing_basis, DiffForms, p, pAdicPrecision)
 end procedure;
 
 
-function BasisOfKillingForms(DiffForms, charpols, basept, uni, p : Precision := 50, targetpAdicPrecision := 5, computationalpAdicPrecision := 5)                 
+function BasisOfKillingForms(DiffForms, charpols, basept, uni, p : Precision := 50, targetpAdicPrecision := 5, computationalpAdicPrecision := 5)
     if targetpAdicPrecision gt computationalpAdicPrecision then
         computationalpAdicPrecision := targetpAdicPrecision;
     end if;
-    reciprocal_charpols := [ReciprocalPolynomial(charpol): charpol in charpols];   
-    
+    reciprocal_charpols := [ReciprocalPolynomial(charpol): charpol in charpols];
+
     diff_uni := Differential(uni);
-    
+
     diff_forms_funcs := [d/diff_uni : d in DiffForms];
 
     Pws_Q<z> := LaurentSeriesAlgebra(Rationals());
@@ -896,8 +896,8 @@ function BasisOfKillingForms(DiffForms, charpols, basept, uni, p : Precision := 
         Append(~diff_forms_exps, exp_d);
     end for;
 
-    powersums := [-z*Evaluate(Derivative(reciprocal_charpol), z) / Evaluate(reciprocal_charpol, z) : 
-                                reciprocal_charpol in reciprocal_charpols];                           
+    powersums := [-z*Evaluate(Derivative(reciprocal_charpol), z) / Evaluate(reciprocal_charpol, z) :
+                                reciprocal_charpol in reciprocal_charpols];
 
     logs := [Integral(om) : om in diff_forms_exps];
     // print "logs:\n", logs;
@@ -982,7 +982,7 @@ function GoodBasisOfDifferentials(C, p : DiffForms := [])
     x := FF ! (X[1]/X[2]);
     dx := Differential(x);
 
-    // we clear any p-powers from numerators and denominators 
+    // we clear any p-powers from numerators and denominators
     // of the differential forms
     fixed_diff_forms := [];
     for d in DiffForms do
@@ -998,12 +998,12 @@ function GoodBasisOfDifferentials(C, p : DiffForms := [])
     while Dimension(sub<Vp | diff_p_vectors>) ne Genus(C) do
         DiffLatC := FreeAbelianGroup(Genus(C));
         DiffLatCp := AbelianGroup([p : x in [1..Genus(C)]]);
-        h := hom<DiffLatC->DiffLatCp | 
+        h := hom<DiffLatC->DiffLatCp |
                  [DiffLatCp ! Eltseq(mpinv(d)) : d in diffs_p]>;
-        new_diff_vec_coordinates := [Eltseq(DiffLatC ! d) : d in OrderedGenerators(Kernel(h)) | 
+        new_diff_vec_coordinates := [Eltseq(DiffLatC ! d) : d in OrderedGenerators(Kernel(h)) |
                                      not d in p*DiffLatC];
-        
-        new_diffs := [&+[coord[i]*fixed_diff_forms[i] : i in [1..#coord]] : 
+
+        new_diffs := [&+[coord[i]*fixed_diff_forms[i] : i in [1..#coord]] :
                       coord in new_diff_vec_coordinates];
 
         for d in new_diffs do
@@ -1023,7 +1023,7 @@ function GoodBasisOfDifferentials(C, p : DiffForms := [])
         end for;
         diff_vectors := [minv(d) : d in fixed_diff_forms];
         diffs_p := [ReduceDifferentialModp(d,p,x) : d in fixed_diff_forms];
-        diff_p_vectors := [mpinv(d) : d in diffs_p];        
+        diff_p_vectors := [mpinv(d) : d in diffs_p];
     end while;
 
     return fixed_diff_forms;
@@ -1107,7 +1107,7 @@ function GetResidueClasses(C,pts, p)
     for pt in ptsCp do
         Append(~residue_classes, []);
     end for;
-    
+
     for pt in pts_seq do
         pt_modp := Cp ! pt;
         i := Index(ptsCp, ChangeUniverse(Eltseq(pt_modp), Integers()));
@@ -1143,14 +1143,14 @@ function ZerosOfKillingFormsModp(DiffForms, killing_basis, p, uniformizer)
 end function;
 
 function FindBadResidueClasses(residue_classes, valuations, Cp)
-    bad_residues := [i : i in [1..#residue_classes] | 
+    bad_residues := [i : i in [1..#residue_classes] |
             forall{v : v in valuations | #residue_classes[i][2] lt v[i] + 1}];
     empty_bad_residues := [Cp ! residue_classes[i][1] : i in bad_residues | #residue_classes[i][2] eq 0];
     nonempty_bad_residues := [Cp ! residue_classes[i][1] : i in bad_residues | #residue_classes[i][2] ne 0];
 
     return bad_residues, empty_bad_residues, nonempty_bad_residues;
 end function;
-   
+
 function ExpandAtBadResidueClasses(DiffForms, killing_basis, residue_classes, bad_residues)
     p := Characteristic(BaseField(Scheme(residue_classes[1][1])));
 
@@ -1176,7 +1176,7 @@ function ExpandAtBadResidueClasses(DiffForms, killing_basis, residue_classes, ba
         logs := [Integral(om) : om in exps];
         Append(~bad_rc_logs, logs);
     end for; // b in bad_residues
-    return bad_rc_logs;    
+    return bad_rc_logs;
 end function;
 
 /*
@@ -1186,13 +1186,13 @@ GoodPrimes := [];
 DiffForms := [];
 basept := 0;
 uni := 0;
-p := 0; 
+p := 0;
 pAdicPrecision := 1;
 UseReduction := true;
 */
-function ChabautyColeman(C : 
-                            HeightBound := 100000, 
-                            NumberOfGoodPrimes := 5, 
+function ChabautyColeman(C :
+                            HeightBound := 100000,
+                            NumberOfGoodPrimes := 5,
                             GoodPrimes := [],
                             DiffForms := [],
                             basept := 0,
@@ -1223,7 +1223,7 @@ function ChabautyColeman(C :
     time pts := PointSearch(C, HeightBound);
     printf "There are %o rational points on C.\n", #pts;
     assert #pts gt 0;
-    
+
     PrintPoints(pts);
 
     ngp := NumberOfGoodPrimes;
@@ -1236,7 +1236,7 @@ function ChabautyColeman(C :
     print "Torsion bounds for Jacobian:", torsion_bound;
 
     rank, principal_gens := FindRankJacobianSubgrp(C, pts, GoodPrimes);
-    try 
+    try
         assert rank lt g;
     catch e
         error "ERROR: the rank of the Jacobian subgroup is greater or equal than the genus...";
@@ -1252,7 +1252,7 @@ function ChabautyColeman(C :
     print "Good prime chosen for Chabauty-Coleman:", p;
     Cp := ReduceCurveModp(C,p);
 
-    printf "Reduction mod %o is surjective: %o \n", p, IsReductionModpSurjective(C, pts, p); 
+    printf "Reduction mod %o is surjective: %o \n", p, IsReductionModpSurjective(C, pts, p);
 
     prec := ChoosePrecision(g,p : pAdicPrecision := pAdicPrecision);
     printf "Precision sufficient to calculate integrals to precision O(p^%o) is: %o\n",pAdicPrecision, prec;
@@ -1272,7 +1272,7 @@ function ChabautyColeman(C :
     print "Searching for the basis of the kernel of reduction J(Q)_known->J(F_p). I am timing this:";
     time ker_p_basis := GetKernelModp(C, pts, p, principal_gens);
     PrintKernelModp(ker_p_basis,p);
-    
+
     print "Choosing basis of differential forms...";
     if #DiffForms eq 0 then
         DiffForms := GoodBasisOfDifferentials(C,p);
@@ -1287,7 +1287,7 @@ function ChabautyColeman(C :
     time charpols := GetCharpols(ker_p_basis, pts, basept, uni, p);
 
     /*
-    print "Characteristic polynomials for the representative points of the Kernel basis:"; 
+    print "Characteristic polynomials for the representative points of the Kernel basis:";
     PolQ<x> := PolynomialRing(Rationals());
     ctr := 1;
     charpols_out := [];
@@ -1303,7 +1303,7 @@ function ChabautyColeman(C :
     time killing_basis, integration_values := BasisOfKillingForms(DiffForms, charpols, basept, uni, p : Precision := prec, targetpAdicPrecision := pAdicPrecision);
 
     print "These are the integration values (each row for a diff form):";
-    print [[pAdicPrettyPrint(integration_values[i,j]):j in [1..Ncols(integration_values)]] 
+    print [[pAdicPrettyPrint(integration_values[i,j]):j in [1..Ncols(integration_values)]]
                                     : i in [1..Nrows(integration_values)]];
 
     PrintKillingBasis(killing_basis, DiffForms, p, pAdicPrecision);
