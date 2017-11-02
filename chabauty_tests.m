@@ -1,4 +1,4 @@
-load "chabauty.mag";
+load "chabauty.m";
 
 // 6-cycle
 P3<x00, x10, x01, x11> := ProjectiveSpace(Rationals(), 3);

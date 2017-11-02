@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////
 //
-// chabauty.mag
+// chabauty.m
 // Authors: Maarten Derickx, Solomon Vishkautsan, 1 October 2017
 //
 // Online at:
-//  https://github.com/wishcow79/chabauty/blob/master/chabauty.mag
+//  https://github.com/wishcow79/chabauty/blob/master/chabauty.m
 // A file of examples is at
-//  https://github.com/wishcow79/chabauty/blob/master/chabauty_tests.mag
+//  https://github.com/wishcow79/chabauty/blob/master/chabauty_tests.m
 //
 //
 //  Chabauty package
