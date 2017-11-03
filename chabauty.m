@@ -30,11 +30,15 @@ function ReduceCurveModp(C,p)
             return C`Cp[p];
     end if;
 
-    if not "UseReduction" in GetAttributes(Type(C)) or
-        not assigned C`UseReduction or C`UseReduction then
+    if not Type(C) eq CrvHyp and (not "UseReduction" in GetAttributes(Type(C)) or
+        not assigned C`UseReduction or C`UseReduction) then
         Cp := Curve(Reduction(C, p));
     else
-        S := BaseChange(C, Bang(Rationals(), GF(p)));
+        if Type(C) eq CrvHyp then
+            S := ChangeRing(C, GF(p));
+        else
+            S := BaseChange(C, Bang(Rationals(), GF(p)));
+        end if;
         if IsCurve(S) then
             Cp := Curve(S);
         else
@@ -1220,7 +1224,15 @@ function ChabautyColeman(C :
 
     printf "\nSearching for rational points up to height %o:\n", HeightBound;
     print "I am timing this:";
-    time pts := PointSearch(C, HeightBound);
+
+    pts := [];
+    if Type(C) eq CrvHyp then
+        //this is needed because the code in the else statement does not work for hyperelliptic curves
+        //maybe the code in the else statement can be removed, I did not check this yet
+        time pts := RationalPoints(C : Bound := HeightBound);
+    else
+        time pts := PointSearch(C, HeightBound);
+    end if;
     printf "There are %o rational points on C.\n", #pts;
     assert #pts gt 0;
 
