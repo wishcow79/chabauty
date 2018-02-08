@@ -19,7 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-
+/*
 function ReduceCurveModp(C,p)
     assert IsCurve(C);
     assert IsPrime(p);
@@ -58,7 +58,9 @@ function ReduceCurveModp(C,p)
 
     return Cp;
 end function;
+*/
 
+/*
 function CleanCurveEqs(C)
     eqs := DefiningEquations(C);
     eqseq := [ClearDenominators(e) : e in eqs];
@@ -70,7 +72,9 @@ function CleanCurveEqs(C)
     end if;
     return D;
 end function;
+*/ 
 
+/*
 procedure SetUseReduction(~C, UseReduction)
     if not "UseReduction" in GetAttributes(Type(C)) then
         AddAttribute(Type(C), "UseReduction");
@@ -78,95 +82,8 @@ procedure SetUseReduction(~C, UseReduction)
 
     C`UseReduction := UseReduction;
 end procedure;
+*/
 
-function ConvertPointToIntSeq(pt)
-    dim := #Eltseq(pt) -1 ;
-
-    pt_seq := [pt[i]*d where d := LCM([Denominator(pt[j]) : j in [1..dim+1]]): i in [1..dim+1]];
-    pt_seq := ChangeUniverse(pt_seq, Integers());
-
-    return pt_seq;
-end function;
-
-function ReducePointModp(pt, p)
-    C := Curve(pt);
-    Cp := ReduceCurveModp(C, p);
-
-    pt_seq := ConvertPointToIntSeq(pt);
-    pt_mod_p := Cp ! pt_seq;
-
-    return pt_mod_p;
-end function;
-
-function ReducePointsModp(pts, p)
-    assert #pts ge 1;
-    assert IsPrime(p);
-    C := Curve(pts[1]);
-    Cp := ReduceCurveModp(C, p);
-
-    pts_mod_p := [Cp ! ConvertPointToIntSeq(pt) : pt in pts];
-
-    return pts_mod_p;
-end function;
-
-procedure PrintPoints(pts)
-    pts_seq := [ConvertPointToIntSeq(pt) : pt in pts];
-
-    print "the points found are: \n";
-    for i in [1..#pts_seq] do
-        printf "P_%o = %o\n", i , pts_seq[i];
-    end for;
-end procedure;
-
-function PrimesOfBadReduction(C)
-    /* Find primes of bad reduction for a projective nonsingular curve */
-    assert IsCurve(C);
-    assert BaseField(C) eq Rationals();
-    assert IsProjective(C);
-
-    ambientC := AmbientSpace(C);
-    dimC := Dimension(ambientC);
-
-    definingC := DefiningEquations(C);
-    definingC := [ClearDenominators(q) : q in definingC];
-    PZ<[a]> := PolynomialRing(Integers(), dimC);
-
-    // for each standard affine patch generate the elimination ideal
-    eqnss := [[Evaluate(q, a[1..j-1] cat [1] cat a[j..dimC]) : q in definingC] : j in [1..(dimC+1)]];
-    reslist := [];
-    for eqns in eqnss do
-      dermat := Matrix([[Derivative(q,i) : i in [1..dimC]] : q in eqns]);
-      minors := Minors(dermat,dimC-1);
-      I := ideal<PZ | eqns, minors>;
-      elim := EliminationIdeal(I, {});
-      Append(~reslist, Integers()!Basis(elim)[1]);
-    end for;
-    badprimes := &join{Set(PrimeDivisors(b)) : b in reslist};
-
-    return badprimes;
-end function;
-
-function IsPrimeOfBadReduction(C,p)
-    try
-        Cp := ReduceCurveModp(C, p);
-        FF := FunctionField(Cp);
-    catch err
-        return true;
-    end try;
-    return not IsNonsingular(Cp);
-end function;
-
-function FindGoodPrimes(C, ngp)
-    p := 3;
-    good_primes := [];
-    while #good_primes lt ngp do
-        if not IsPrimeOfBadReduction(C,p) then
-            Append(~good_primes, p);
-        end if;
-        p := NextPrime(p);
-    end while;
-    return good_primes;
-end function;
 
 function GetClassGroupModp(C, p)
     Cp := ReduceCurveModp(C,p);
@@ -224,28 +141,6 @@ function MapFAtoClProd(C, pts, GoodPrimes)
     return FAtoClprod;
 end function;
 
-function RationalPointsModp(C, p)
-    if "rat_pts_mod_p" in GetAttributes(Type(C)) and
-        assigned C`rat_pts_mod_p and
-        IsDefined(C`rat_pts_mod_p, p) then
-            return C`rat_pts_mod_p[p];
-    end if;
-
-    Cp := ReduceCurveModp(C, p);
-    rat_pts := RationalPoints(Cp);
-    if not "rat_pts_mod_p" in GetAttributes(Type(C)) then
-        AddAttribute(Type(C), "rat_pts_mod_p");
-    end if;
-
-    if not assigned C`rat_pts_mod_p then
-        C`rat_pts_mod_p := [];
-    end if;
-
-    rat_pts := [ChangeUniverse(Eltseq(pt), Integers()) : pt in rat_pts];
-    C`rat_pts_mod_p[p] := rat_pts;
-
-    return rat_pts;
-end function;
 
 function MapCpsToClprod(C, GoodPrimes, basept)
     assert IsCoercible(C, basept);
@@ -395,32 +290,32 @@ function FindRankJacobianSubgrp(C, pts, GoodPrimes)
     return rank_upper_bound, principal_gens;
 end function;
 
-function RemovePContentModI(F, p, I)
-    assert F ne 0;
+// function RemovePContentModI(F, p, I)
+//     assert F ne 0;
 
-    RZ := Generic(I);
-    assert BaseRing(RZ) eq Integers();
-    Rp := ChangeRing(RZ, GF(p));
+//     RZ := Generic(I);
+//     assert BaseRing(RZ) eq Integers();
+//     Rp := ChangeRing(RZ, GF(p));
 
-    gens_I := Generators(I);
-    gens_Ip := [Rp ! g : g in gens_I];
-    Ip := IdealWithFixedBasis(gens_Ip);
+//     gens_I := Generators(I);
+//     gens_Ip := [Rp ! g : g in gens_I];
+//     Ip := IdealWithFixedBasis(gens_Ip);
 
-    Fp := Rp ! F;
-    coeff := 1;
+//     Fp := Rp ! F;
+//     coeff := 1;
 
-    while Fp in Ip do
-        Fp_coords := Coordinates(Ip, Fp);
-        fixF := &+[gens_I[i]*(RZ ! Fp_coords[i]) : i in [1..#Fp_coords]];
-        F -:= fixF;
-        contentF := Content(F);
-        coeff *:= contentF;
-        F := ExactQuotient(F , contentF);
-        Fp := Rp ! F;
-    end while;
+//     while Fp in Ip do
+//         Fp_coords := Coordinates(Ip, Fp);
+//         fixF := &+[gens_I[i]*(RZ ! Fp_coords[i]) : i in [1..#Fp_coords]];
+//         F -:= fixF;
+//         contentF := Content(F);
+//         coeff *:= contentF;
+//         F := ExactQuotient(F , contentF);
+//         Fp := Rp ! F;
+//     end while;
 
-    return F, coeff;
-end function;
+//     return F, coeff;
+// end function;
 
 function SaturatedIdealOfCurveAtPrime(C,p)
     if "SaturatedIdeal" in GetAttributes(Type(C)) and
@@ -451,105 +346,105 @@ function SaturatedIdealOfCurveAtPrime(C,p)
     return IZsat;
 end function;
 
-function ValuationOfRationalFunction(f,p)
-    FF := Parent(f);
-    C := Curve(FF);
+// function ValuationOfRationalFunction(f,p)
+//     FF := Parent(f);
+//     C := Curve(FF);
 
-    IZsat := SaturatedIdealOfCurveAtPrime(C,p);
-    ambRZ := Generic(IZsat);
+//     IZsat := SaturatedIdealOfCurveAtPrime(C,p);
+//     ambRZ := Generic(IZsat);
 
-    num1, den1 := IntegralSplit(f,C); // num and den are in ambR
+//     num1, den1 := IntegralSplit(f,C); // num and den are in ambR
 
-    num2, lcd_num1 := ClearDenominators(num1);
-    den2, lcd_den1 := ClearDenominators(den1);
+//     num2, lcd_num1 := ClearDenominators(num1);
+//     den2, lcd_den1 := ClearDenominators(den1);
 
-    num3 := ambRZ ! num2;
-    den3 := ambRZ ! den2;
+//     num3 := ambRZ ! num2;
+//     den3 := ambRZ ! den2;
 
-    content_num3, num4 := ContentAndPrimitivePart(num3);
-    content_den3, den4 := ContentAndPrimitivePart(den3);
+//     content_num3, num4 := ContentAndPrimitivePart(num3);
+//     content_den3, den4 := ContentAndPrimitivePart(den3);
 
-    num5,coeff_num5 := RemovePContentModI(num4, p, IZsat);
-    den5,coeff_den5 := RemovePContentModI(num5, p, IZsat);
+//     num5,coeff_num5 := RemovePContentModI(num4, p, IZsat);
+//     den5,coeff_den5 := RemovePContentModI(num5, p, IZsat);
 
-    coeff := (lcd_den1 * content_num3 * coeff_num5) / (lcd_num1 * content_den3 * coeff_den5);
-    v := Valuation(coeff,p);
+//     coeff := (lcd_den1 * content_num3 * coeff_num5) / (lcd_num1 * content_den3 * coeff_den5);
+//     v := Valuation(coeff,p);
 
-    return v;
-end function;
+//     return v;
+// end function;
 
-function ReduceRationalFunctionModp(f,p)
-    assert IsPrime(p);
+// function ReduceRationalFunctionModp(f,p)
+//     assert IsPrime(p);
 
-    FF := Parent(f);
-    C := Curve(FF);
+//     FF := Parent(f);
+//     C := Curve(FF);
 
-    R := CoordinateRing(C);
-    I := Ideal(C);
-    basisI := [ClearDenominators(b) : b in Basis(I)];
-    I := Ideal(basisI);
+//     R := CoordinateRing(C);
+//     I := Ideal(C);
+//     basisI := [ClearDenominators(b) : b in Basis(I)];
+//     I := Ideal(basisI);
 
-    ambR := CoordinateRing(Ambient(C));
-    ambRp := ChangeRing(ambR, GF(p));
+//     ambR := CoordinateRing(Ambient(C));
+//     ambRp := ChangeRing(ambR, GF(p));
 
-    IZsat := SaturatedIdealOfCurveAtPrime(C,p);
-    ambRZ := Generic(IZsat);
+//     IZsat := SaturatedIdealOfCurveAtPrime(C,p);
+//     ambRZ := Generic(IZsat);
 
-    Cp := ReduceCurveModp(C,p);
-    FFp := FunctionField(Cp);
-    Ip := Ideal(Cp);
-    basisIp := Basis(Ip);
-    Ip := Ideal([ambRp ! b : b in basisIp]);
-    Rp<[a]> := CoordinateRing(Ambient(Cp));
+//     Cp := ReduceCurveModp(C,p);
+//     FFp := FunctionField(Cp);
+//     Ip := Ideal(Cp);
+//     basisIp := Basis(Ip);
+//     Ip := Ideal([ambRp ! b : b in basisIp]);
+//     Rp<[a]> := CoordinateRing(Ambient(Cp));
 
-    num1, den1 := IntegralSplit(f,C); // num and den are in ambR
+//     num1, den1 := IntegralSplit(f,C); // num and den are in ambR
 
-    num2, lcd_num1 := ClearDenominators(num1);
-    den2, lcd_den1 := ClearDenominators(den1);
+//     num2, lcd_num1 := ClearDenominators(num1);
+//     den2, lcd_den1 := ClearDenominators(den1);
 
-    num3 := ambRZ ! num2;
-    den3 := ambRZ ! den2;
+//     num3 := ambRZ ! num2;
+//     den3 := ambRZ ! den2;
 
-    content_num3, num4 := ContentAndPrimitivePart(num3);
-    content_den3, den4 := ContentAndPrimitivePart(den3);
+//     content_num3, num4 := ContentAndPrimitivePart(num3);
+//     content_den3, den4 := ContentAndPrimitivePart(den3);
 
-    num4p := ambRp ! num4;
-    den4p := ambRp ! den4;
-    coeff4 := (lcd_den1 * content_num3) / (lcd_num1 * content_den3);
+//     num4p := ambRp ! num4;
+//     den4p := ambRp ! den4;
+//     coeff4 := (lcd_den1 * content_num3) / (lcd_num1 * content_den3);
 
-    if not den4p in Ip and Valuation(coeff4, p) ge 0 then
-        return FFp ! (Evaluate((coeff4 * num4p), a) / Evaluate(den4p,a));
-    end if;
+//     if not den4p in Ip and Valuation(coeff4, p) ge 0 then
+//         return FFp ! (Evaluate((coeff4 * num4p), a) / Evaluate(den4p,a));
+//     end if;
 
-    // if we can't fix the numerator then we will never be able to fix either the denominator
-    // or the bad coefficient.
-    if not num4p in Ip then
-        error "Error in reducing rational function. Nothing we can do to fix p in denominator.";
-    end if;
+//     // if we can't fix the numerator then we will never be able to fix either the denominator
+//     // or the bad coefficient.
+//     if not num4p in Ip then
+//         error "Error in reducing rational function. Nothing we can do to fix p in denominator.";
+//     end if;
 
-    num5, coeff_num5 := RemovePContentModI(num4, p, IZsat);
+//     num5, coeff_num5 := RemovePContentModI(num4, p, IZsat);
 
-    if den4p in Ip then
-        den5, coeff_den5 := RemovePContentModI(den4, p, IZsat);
-    else
-        coeff_den5 := 1;
-        den5 := den4;
-    end if;
+//     if den4p in Ip then
+//         den5, coeff_den5 := RemovePContentModI(den4, p, IZsat);
+//     else
+//         coeff_den5 := 1;
+//         den5 := den4;
+//     end if;
 
-    num5p := ambRp ! num5;
-    den5p := ambRp ! den5;
+//     num5p := ambRp ! num5;
+//     den5p := ambRp ! den5;
 
-    // sanity check:
-    assert not num5p in Ip and not den5p in Ip;
+//     // sanity check:
+//     assert not num5p in Ip and not den5p in Ip;
 
-    coeff5 := coeff4 * coeff_num5 / coeff_den5;
+//     coeff5 := coeff4 * coeff_num5 / coeff_den5;
 
-    if Valuation(coeff5, p) lt 0 then
-        error "Failed to reduce rational function mod p";
-    end if;
+//     if Valuation(coeff5, p) lt 0 then
+//         error "Failed to reduce rational function mod p";
+//     end if;
 
-    return FFp ! (Evaluate((coeff5 * num5p), a) / Evaluate(den5p,a));
-end function;
+//     return FFp ! (Evaluate((coeff5 * num5p), a) / Evaluate(den5p,a));
+// end function;
 
 // function LiftRationalFunction(f, C)
 //     // lift rational function to a rational function on the curve C
@@ -569,15 +464,15 @@ end function;
 //     return f_lift;
 // end function;
 
-function ReduceDifferentialModp(d, p, uni)
-    C := Curve(d);
-    duni := Differential(uni);
-    f := d / duni;
-    f_p := ReduceRationalFunctionModp(f,p);
-    uni_p := ReduceRationalFunctionModp(uni, p);
-    duni_p := Differential(uni_p);
-    return f_p * duni_p;
-end function;
+// function ReduceDifferentialModp(d, p, uni)
+//     C := Curve(d);
+//     duni := Differential(uni);
+//     f := d / duni;
+//     f_p := ReduceRationalFunctionModp(f,p);
+//     uni_p := ReduceRationalFunctionModp(uni, p);
+//     duni_p := Differential(uni_p);
+//     return f_p * duni_p;
+// end function;
 
 procedure PrintKernelModp(ker_basis, p)
     printf "Basis of kernel of reduction modulo %o:\n", p;
