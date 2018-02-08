@@ -1,6 +1,19 @@
 use_cache := true;
 prefix := "Dyfj";
 
+//The typical use case of is the functions in this file is the following:
+//
+//function ComputeX(object,parameters)
+//  if IsArrayCached(object,"X",parameters) then
+//      return GetArrayCache(object,"X",parameters);
+//  else;
+//      X := <some code that computes X>;
+//      SetArrayCache(object,"X",parameters,X);
+//      return X;
+//  end if;
+//end function;
+
+
 function IsCached(object,attribute0)
     if not use_cache then return false; end if;
     attribute := prefix cat attribute0;
