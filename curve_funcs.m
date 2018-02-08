@@ -1,9 +1,18 @@
 /* TODO: Brute reduction might fail if coefficients are not integers */ 
 
-intrinsic ReduceCurveModp(C::Crv,p::RngIntElt : saturate := true) -> Crv
-{Reduce curve modulo p. This function also caches the reduced curve Cp in the curve C}
+load "cache.m";
+
+function ReduceCurveModp(C,p : saturate := true)
+// intrinsic ReduceCurveModp(C::Crv,p::RngIntElt : saturate := true)  -> Crv
+//{Reduce curve modulo p. This function also caches the reduced curve Cp in the curve C}
+
+// input checks:
     assert IsCurve(C);
     assert IsPrime(p);
+
+    if IsArrayCached(C,"Cp",p) then
+        return GetArrayCache(C,"Cp",p);
+    end if;
 
     if not Type(C) eq CrvHyp and saturate then
         Cp := Curve(Reduction(C, p)); // Reduction uses saturation 
@@ -20,8 +29,9 @@ intrinsic ReduceCurveModp(C::Crv,p::RngIntElt : saturate := true) -> Crv
         end if;
     end if;
 
+    SetArrayCache(C,"Cp",p,Cp);
     return Cp;
-end intrinsic;
+end function;
 
 function PrimesOfBadReduction(C)
     /* Find primes of bad reduction for a projective nonsingular curve */
@@ -73,7 +83,6 @@ function FindGoodPrimes(C, ngp)
     return good_primes;
 end function;
 
-
 function RationalPointsModp(C, p)
     if "rat_pts_mod_p" in GetAttributes(Type(C)) and
         assigned C`rat_pts_mod_p and
@@ -96,4 +105,3 @@ function RationalPointsModp(C, p)
 
     return rat_pts;
 end function;
-

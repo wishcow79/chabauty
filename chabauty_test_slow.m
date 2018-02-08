@@ -1,26 +1,5 @@
 load "chabauty.m";
 
-// 6-cycle
-P3<x00, x10, x01, x11> := ProjectiveSpace(Rationals(), 3);
-Flst := [-x10*x01 + x00*x11,
-x00^3 - x00*x10^2 + x00^2*x01 - 5*x00*x10*x01 + 2*x10^2*x01 - x10*x01^2 + x10^2*x11 + 7*x10*x01*x11 - x01^2*x11 - 2*x10*x11^2 - 3*x11^3];
-C := Curve(P3, Flst);
-SetVerbose("User1", true);
-booCC, C, pts, p, basept,
-EmptyBadResidues, NonemptyBadResidues := ChabautyColeman(C : p := 5); // this is the prime used by Stoll
-assert not booCC;
-// TODO: remove nonempty bad residue class using power series expansion
-
-// N4H2  (g=3,H)   1.7s   (solved by basic CC)
-Pr4<[w]> := ProjectiveSpace(Rationals(), 4);
-qfseq := [w[2]^3 + 6*w[2]^2*w[3] + 2*w[1]*w[3]^2 + 12*w[2]*w[3]^2 + 9*w[3]^3 - w[2]*w[4]^2 + w[1]*w[3]*w[5] + w[2]*w[3]*w[5] + 3*w[3]^2*w[5] - 6*w[2]*w[4]*w[5] - w[1]*w[5]^2 - 11*w[2]*w[5]^2 - 7*w[3]*w[5]^2 - w[5]^3,
-2*w[1]^2*w[3] + w[2]^2*w[3] + 9*w[1]*w[3]^2 + 6*w[2]*w[3]^2 + 12*w[3]^3 - w[1]^2*w[5] - w[2]^2*w[5] - 6*w[1]*w[3]*w[5] - 6*w[2]*w[3]*w[5] - 11*w[3]^2*w[5] - w[1]*w[5]^2,
-w[2]^2*w[4] - w[2]*w[4]^2 + 6*w[2]^2*w[5] + 2*w[1]*w[3]*w[5] + 12*w[2]*w[3]*w[5] + 9*w[3]^2*w[5] - 6*w[2]*w[4]*w[5] - w[1]*w[5]^2 - 11*w[2]*w[5]^2 - 6*w[3]*w[5]^2 - w[5]^3,
-w[1]*w[2] - w[3]^2,
-w[1]*w[4] - w[3]*w[5],
-w[3]*w[4] - w[2]*w[5]];
-C := Curve(Pr4, qfseq);
-assert ChabautyColeman(C);
 
 // R4P5 -- bad residue classes
 // BadPrimes := [2, 3, 7, 37, 61, 569] --- 7 is good when C is saturated at 7
@@ -59,30 +38,6 @@ qfseq :=
     - w[2]*w[6] + w[4]*w[6] + w[5]*w[6] ];
 D := Curve(Pr5, qfseq);
 assert ChabautyColeman(D);
-
-// ramified 5-cycles (g=2) - 2sec   (solved by basic CC for p := 3)
-A2<x,y> := AffinePlane(Rationals());
-F := -y^2 + x^6 + 8*x^5 + 22*x^4 + 22*x^3 + 5*x^2 + 6*x + 1;
-C := Curve(A2, F);
-D, m := EmbedPlaneCurveInP3(C);
-D := Curve(D);
-assert ChabautyColeman(D);
-
-// curve of Gordon & Grant that is solved directly by Coleman's theorem for p:= 7: - 2sec
-A2<x,y> := AffinePlane(Rationals());
-F := -y^2 + x*(x-1)*(x-2)*(x-5)*(x-6);
-C := Curve(A2, F);
-D, m := EmbedPlaneCurveInP3(C);
-D := Curve(D);
-assert ChabautyColeman(D);
-
-// Diophantus curve that should fail the rank test
-A2<x,y> := AffinePlane(Rationals());
-F := -y^2 + x^6+x^2+1;
-C := Curve(A2, F);
-D, m := EmbedPlaneCurveInP3(C);
-D := Curve(D);
-ChabautyColeman(D);
 
 // N4H3 - 27sec (solved by CC for p := 3)
 // g := 5;
@@ -182,3 +137,12 @@ ChabautyColeman(C : UseReduction := false);
 P2<x,y,z> := ProjectivePlane(Rationals());
 F := x^4+2*x^3*y+3*x^2*y^2+2*x*y^3+18*x*y*z^2+9*y^2*z^2-9*z^4;
 C := Curve(P2, F);
+
+// curve of Gordon & Grant that is solved directly by Coleman's theorem for p:= 7: - 2sec
+A2<x,y> := AffinePlane(Rationals());
+F := -y^2 + x*(x-1)*(x-2)*(x-5)*(x-6);
+C := Curve(A2, F);
+D, m := EmbedPlaneCurveInP3(C);
+D := Curve(D);
+assert ChabautyColeman(D);
+

@@ -1,5 +1,8 @@
-Attach("pcontent.m");
-Attach("curve_funcs.m");
+load "pcontent.m";
+load "curve_funcs.m";
+
+// load "curve_funcs.m";
+
 /*
 
 This file is dedicated to all functions that relate to function fields of curves, including differentials.
@@ -53,8 +56,10 @@ Uses external functions:
 * ReduceCurveModp
 * pContentModI
 */
-intrinsic ReduceRationalFunctionModp(f::FldFunFracSchElt,p::RngIntElt) -> FldFunFracSchElt
-{ Reduce rational function element of function field modulo p}
+
+// intrinsic ReduceRationalFunctionModp(f::FldFunFracSchElt,p::RngIntElt) -> FldFunFracSchElt
+// { Reduce rational function element of function field modulo p}
+function ReduceRationalFunctionModp(f,p)
     assert IsPrime(p);
 
     FF := Parent(f); // The function field of the function f
@@ -130,10 +135,11 @@ intrinsic ReduceRationalFunctionModp(f::FldFunFracSchElt,p::RngIntElt) -> FldFun
     end if;
 
     return FFp ! (Evaluate((coeff5 * num5p), a) / Evaluate(den5p,a));
-end intrinsic;
+end function;
 
-intrinsic ReduceDifferentialModp(d::DiffCrvElt, p::RngIntElt, uni::FldFunFracSchElt) -> DiffCrvElt
-{returns reduction of differential mod p}
+// intrinsic ReduceDifferentialModp(d::DiffCrvElt, p::RngIntElt, uni::FldFunFracSchElt) -> DiffCrvElt
+// {returns reduction of differential mod p}
+function ReduceDifferentialModp(d, p, uni)
     C := Curve(d);
     du := Differential(uni);
     f := d / du;
@@ -141,10 +147,11 @@ intrinsic ReduceDifferentialModp(d::DiffCrvElt, p::RngIntElt, uni::FldFunFracSch
     uni_p := ReduceRationalFunctionModp(uni, p);
     duni_p := Differential(uni_p);
     return f_p * duni_p;
-end intrinsic;
+end function;
 
-intrinsic ValuationOfRationalFunction(f::FldFunFracSchElt,p::RngIntElt) -> RngIntElt
-{returns valuation of a rational function of a curve at a prime p}
+// intrinsic ValuationOfRationalFunction(f::FldFunFracSchElt,p::RngIntElt) -> RngIntElt
+// {returns valuation of a rational function of a curve at a prime p}
+function ValuationOfRationalFunction(f,p)
     FF := Parent(f);
     C := Curve(FF);
 
@@ -168,12 +175,12 @@ intrinsic ValuationOfRationalFunction(f::FldFunFracSchElt,p::RngIntElt) -> RngIn
     content_num3, num4 := ContentAndPrimitivePart(num3);
     content_den3, den4 := ContentAndPrimitivePart(den3);
 
-    num5,coeff_num5 := RemovePContentModI(num4, p, IZ);
-    den5,coeff_den5 := RemovePContentModI(num5, p, IZ);
+    coeff_num5, num5 := pContentModI(num4, p, IZ);
+    coeff_den5, den5 := pContentModI(num5, p, IZ);
 
     coeff := (lcd_den1 * content_num3 * coeff_num5) / (lcd_num1 * content_den3 * coeff_den5);
     v := Valuation(coeff,p);
 
     return v;
-end intrinsic;
+end function;
 

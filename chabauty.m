@@ -19,46 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-/*
-function ReduceCurveModp(C,p)
-    assert IsCurve(C);
-    assert IsPrime(p);
 
-    if "Cp" in GetAttributes(Type(C)) and
-        assigned C`Cp and
-        IsDefined(C`Cp, p) then
-            return C`Cp[p];
-    end if;
-
-    if not Type(C) eq CrvHyp and (not "UseReduction" in GetAttributes(Type(C)) or
-        not assigned C`UseReduction or C`UseReduction) then
-        Cp := Curve(Reduction(C, p));
-    else
-        if Type(C) eq CrvHyp then
-            S := ChangeRing(C, GF(p));
-        else
-            S := BaseChange(C, Bang(Rationals(), GF(p)));
-        end if;
-        if IsCurve(S) then
-            Cp := Curve(S);
-        else
-            error "reduction modulo p is not a curve.";
-        end if;
-    end if;
-
-    if not "Cp" in GetAttributes(Type(C)) then
-        AddAttribute(Type(C), "Cp");
-    end if;
-
-    if not assigned C`Cp then
-        C`Cp := [];
-    end if;
-
-    C`Cp[p] := Cp;
-
-    return Cp;
-end function;
-*/
 
 /*
 function CleanCurveEqs(C)
@@ -74,16 +35,9 @@ function CleanCurveEqs(C)
 end function;
 */ 
 
-/*
-procedure SetUseReduction(~C, UseReduction)
-    if not "UseReduction" in GetAttributes(Type(C)) then
-        AddAttribute(Type(C), "UseReduction");
-    end if;
-
-    C`UseReduction := UseReduction;
-end procedure;
-*/
-
+load "curve_funcs.m";
+load "point_funcs.m";
+load "curve_ff.m";
 
 function GetClassGroupModp(C, p)
     Cp := ReduceCurveModp(C,p);
@@ -290,33 +244,6 @@ function FindRankJacobianSubgrp(C, pts, GoodPrimes)
     return rank_upper_bound, principal_gens;
 end function;
 
-// function RemovePContentModI(F, p, I)
-//     assert F ne 0;
-
-//     RZ := Generic(I);
-//     assert BaseRing(RZ) eq Integers();
-//     Rp := ChangeRing(RZ, GF(p));
-
-//     gens_I := Generators(I);
-//     gens_Ip := [Rp ! g : g in gens_I];
-//     Ip := IdealWithFixedBasis(gens_Ip);
-
-//     Fp := Rp ! F;
-//     coeff := 1;
-
-//     while Fp in Ip do
-//         Fp_coords := Coordinates(Ip, Fp);
-//         fixF := &+[gens_I[i]*(RZ ! Fp_coords[i]) : i in [1..#Fp_coords]];
-//         F -:= fixF;
-//         contentF := Content(F);
-//         coeff *:= contentF;
-//         F := ExactQuotient(F , contentF);
-//         Fp := Rp ! F;
-//     end while;
-
-//     return F, coeff;
-// end function;
-
 function SaturatedIdealOfCurveAtPrime(C,p)
     if "SaturatedIdeal" in GetAttributes(Type(C)) and
         assigned C`SaturatedIdeal and
@@ -346,106 +273,6 @@ function SaturatedIdealOfCurveAtPrime(C,p)
     return IZsat;
 end function;
 
-// function ValuationOfRationalFunction(f,p)
-//     FF := Parent(f);
-//     C := Curve(FF);
-
-//     IZsat := SaturatedIdealOfCurveAtPrime(C,p);
-//     ambRZ := Generic(IZsat);
-
-//     num1, den1 := IntegralSplit(f,C); // num and den are in ambR
-
-//     num2, lcd_num1 := ClearDenominators(num1);
-//     den2, lcd_den1 := ClearDenominators(den1);
-
-//     num3 := ambRZ ! num2;
-//     den3 := ambRZ ! den2;
-
-//     content_num3, num4 := ContentAndPrimitivePart(num3);
-//     content_den3, den4 := ContentAndPrimitivePart(den3);
-
-//     num5,coeff_num5 := RemovePContentModI(num4, p, IZsat);
-//     den5,coeff_den5 := RemovePContentModI(num5, p, IZsat);
-
-//     coeff := (lcd_den1 * content_num3 * coeff_num5) / (lcd_num1 * content_den3 * coeff_den5);
-//     v := Valuation(coeff,p);
-
-//     return v;
-// end function;
-
-// function ReduceRationalFunctionModp(f,p)
-//     assert IsPrime(p);
-
-//     FF := Parent(f);
-//     C := Curve(FF);
-
-//     R := CoordinateRing(C);
-//     I := Ideal(C);
-//     basisI := [ClearDenominators(b) : b in Basis(I)];
-//     I := Ideal(basisI);
-
-//     ambR := CoordinateRing(Ambient(C));
-//     ambRp := ChangeRing(ambR, GF(p));
-
-//     IZsat := SaturatedIdealOfCurveAtPrime(C,p);
-//     ambRZ := Generic(IZsat);
-
-//     Cp := ReduceCurveModp(C,p);
-//     FFp := FunctionField(Cp);
-//     Ip := Ideal(Cp);
-//     basisIp := Basis(Ip);
-//     Ip := Ideal([ambRp ! b : b in basisIp]);
-//     Rp<[a]> := CoordinateRing(Ambient(Cp));
-
-//     num1, den1 := IntegralSplit(f,C); // num and den are in ambR
-
-//     num2, lcd_num1 := ClearDenominators(num1);
-//     den2, lcd_den1 := ClearDenominators(den1);
-
-//     num3 := ambRZ ! num2;
-//     den3 := ambRZ ! den2;
-
-//     content_num3, num4 := ContentAndPrimitivePart(num3);
-//     content_den3, den4 := ContentAndPrimitivePart(den3);
-
-//     num4p := ambRp ! num4;
-//     den4p := ambRp ! den4;
-//     coeff4 := (lcd_den1 * content_num3) / (lcd_num1 * content_den3);
-
-//     if not den4p in Ip and Valuation(coeff4, p) ge 0 then
-//         return FFp ! (Evaluate((coeff4 * num4p), a) / Evaluate(den4p,a));
-//     end if;
-
-//     // if we can't fix the numerator then we will never be able to fix either the denominator
-//     // or the bad coefficient.
-//     if not num4p in Ip then
-//         error "Error in reducing rational function. Nothing we can do to fix p in denominator.";
-//     end if;
-
-//     num5, coeff_num5 := RemovePContentModI(num4, p, IZsat);
-
-//     if den4p in Ip then
-//         den5, coeff_den5 := RemovePContentModI(den4, p, IZsat);
-//     else
-//         coeff_den5 := 1;
-//         den5 := den4;
-//     end if;
-
-//     num5p := ambRp ! num5;
-//     den5p := ambRp ! den5;
-
-//     // sanity check:
-//     assert not num5p in Ip and not den5p in Ip;
-
-//     coeff5 := coeff4 * coeff_num5 / coeff_den5;
-
-//     if Valuation(coeff5, p) lt 0 then
-//         error "Failed to reduce rational function mod p";
-//     end if;
-
-//     return FFp ! (Evaluate((coeff5 * num5p), a) / Evaluate(den5p,a));
-// end function;
-
 // function LiftRationalFunction(f, C)
 //     // lift rational function to a rational function on the curve C
 //     FF<[x]> := FunctionField(C);
@@ -462,16 +289,6 @@ end function;
 
 //     f_lift := Evaluate(N_lift/D_lift,x);
 //     return f_lift;
-// end function;
-
-// function ReduceDifferentialModp(d, p, uni)
-//     C := Curve(d);
-//     duni := Differential(uni);
-//     f := d / duni;
-//     f_p := ReduceRationalFunctionModp(f,p);
-//     uni_p := ReduceRationalFunctionModp(uni, p);
-//     duni_p := Differential(uni_p);
-//     return f_p * duni_p;
 // end function;
 
 procedure PrintKernelModp(ker_basis, p)
@@ -610,69 +427,6 @@ function IsGoodUniformizer(u, basept, p)
     end if;
 end function;
 
-
-// function GetGoodUniformizer2(basept, p)
-//     C := Curve(basept);
-//     dim := Dimension(AmbientSpace(C));
-//     Cp := ReduceCurveModp(C,p);
-
-//     FF<[x]> := FunctionField(C);
-//     FFp<[b]> := FunctionField(Cp);
-//     PolQ<[a]> := PolynomialRing(BaseRing(C), dim);
-
-//     // we reduce the basept modulo p
-//     basept_seq := Eltseq(basept);
-//     basept_seq := [basept_seq[i]*d where d := LCM([Denominator(basept_seq[j]) : j in [1..dim+1]]): i in [1..dim+1]];
-//     basept_seq := ChangeUniverse(basept_seq, Integers());
-//     basept_modp := Cp ! basept_seq;
-
-//     // we start with a uniformizer u1 at the basept and reduce it modulo p
-//     // but first we replace u1 with a function that can be reduced mod p
-//     u1 := UniformizingParameter(basept);
-//     N := Evaluate(Numerator(u1), a);
-//     D := Evaluate(Denominator(u1), a);
-//     N, L1 := ClearDenominators(N);
-//     D, L2 := ClearDenominators(D);
-//     N := N / GCD(ChangeUniverse(Coefficients(N), Integers()));
-//     D := D / GCD(ChangeUniverse(Coefficients(D), Integers()));
-//     u1 := Evaluate(N/D, x);
-//     // sanity check::: we make sure u1 is still a uniformizer:
-//     assert Valuation(u1, basept) eq 1;
-
-//     // we reduce the uniformizer u1 mod p
-//     u1modp := ReduceRationalFunction(u1, Cp);
-
-//     // if u1modp is a uniformizer at the reduction of the basept then we are done
-//     v1 := Valuation(u1modp, basept_modp);
-//     if v1 eq 1 then
-//         vprint User1: "Reduction of u1 is a uniformizer";
-//         return u1;
-//     end if;
-
-//     // We now have the situation where u1modp is not a uniformizer at basept_modp.
-//     // We take a uniformizer at basept_modp and lift it to a rational function on C
-//     u2modp := UniformizingParameter(basept_modp);
-//     u2 := LiftRationalFunction(u2modp, C);
-//     v2 := Valuation(u2, basept);
-//     if v2 eq 1 then
-//         vprint User1: "lift of u2 is a uniformizer";
-//         // sanity check:::
-//         assert Valuation(ReduceRationalFunction(u2, Cp), basept_modp) eq 1;
-//         return u2;
-//     end if;
-
-//     if v2 gt 1 then
-//         u3 := p*u1+u2;
-//     else
-//         // we get here only if v2 is now < 0
-//         u3 := 1/(p/u1 + 1/u2);
-//     end if;
-
-//     // sanity check:::
-//     assert Valuation(u3, basept) eq 1;
-//     assert Valuation(ReduceRationalFunction(u3, Cp), basept_modp) eq 1;
-//     return u3;
-// end function;
 
 function GetGoodUniformizer(basept, p)
     C := Curve(basept);
@@ -1107,7 +861,7 @@ function ChabautyColeman(C :
     assert IsNonsingular(C);
 
     // CleanCurveEqs(~C);
-    SetUseReduction(~C, UseReduction);
+    // SetUseReduction(~C, UseReduction);
 
     dim := Dimension(AmbientSpace(C));
 
@@ -1146,7 +900,7 @@ function ChabautyColeman(C :
     try
         assert rank lt g;
     catch e
-        error "ERROR: the rank of the Jacobian subgroup is greater or equal than the genus...";
+        error "ERROR: rank >= genus";
     end try;
 
     // choose prime for Chabauty--Coleman

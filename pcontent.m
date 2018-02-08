@@ -8,8 +8,9 @@ I. We might then get a polynomial which has p-content, i.e. when reduced modulo 
 This function removes the p-content, and returns the content and the content-less polynomial.
 */
 
-intrinsic pContentModI(F::RngMPolElt, p::RngIntElt, I::RngMPol) -> RngIntElt, RngMPolElt
-{Return pPrimitive part and pContent of the multivariate polynomial F modulo ideal I}
+// intrinsic pContentModI(F::RngMPolElt, p::RngIntElt, I::RngMPol) -> RngIntElt, RngMPolElt
+// {Return pPrimitive part and pContent of the multivariate polynomial F modulo ideal I}
+function pContentModI(F, p, I)
     assert F ne 0;
 
     RZ := Generic(I);
@@ -37,4 +38,4 @@ intrinsic pContentModI(F::RngMPolElt, p::RngIntElt, I::RngMPol) -> RngIntElt, Rn
     end while;
 
     return coeff,F;
-end intrinsic;
+end function;
