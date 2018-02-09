@@ -38,6 +38,7 @@ end function;
 load "curve_funcs.m";
 load "point_funcs.m";
 load "curve_ff.m";
+load "hyperelliptic.m";
 
 function GetClassGroupModp(C, p)
     Cp := ReduceCurveModp(C,p);
@@ -436,6 +437,11 @@ end function;
 
 function GetGoodUniformizer(basept, p)
     C := Curve(basept);
+
+    if Type(C) eq CrvHyp then
+        return GoodUniformizerHyp(basept);
+    end if;
+
     dim := Dimension(AmbientSpace(C));
     Cp := ReduceCurveModp(C,p);
     RCp<[W]> := AmbientSpace(Cp);
@@ -625,6 +631,10 @@ end procedure;
 function GoodBasisOfDifferentials(C, p : DiffForms := [])
     if DiffForms eq [] then
         DiffForms := BasisOfHolomorphicDifferentials(C);
+    end if;
+
+    if Type(C) eq CrvHyp then
+        return BasisOfHolomorphicDifferentials(C);
     end if;
 
     V, m := SpaceOfHolomorphicDifferentials(C);
