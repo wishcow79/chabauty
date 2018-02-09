@@ -45,5 +45,12 @@ catch e
 	assert e`Object eq "ERROR: rank >= genus";
 end try;
 
+// curve of Gordon & Grant that is solved directly by Coleman's theorem for p:= 7: - 2sec
+A2<x,y> := AffinePlane(Rationals());
+F := -y^2 + x*(x-1)*(x-2)*(x-5)*(x-6);
+C := Curve(A2, F);
+D, m := EmbedPlaneCurveInP3(C);
+D := Curve(D);
+assert ChabautyColeman(D);
 
 
