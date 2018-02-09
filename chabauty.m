@@ -394,9 +394,15 @@ function GetCharpols(ker_basis, pts, basept, uni, p)
 
     divs_p_red := [Reduction(d, basept_div) : d in divs_p];
     decomps := [Decomposition(d) : d in divs_p_red];
-    assert forall{d : d in decomps | #d eq 1 and d[1,2] eq 1};
-    dpts := [* RepresentativePoint(d[1,1]) : d in decomps *];
-    charpols := [MinimalPolynomial(Evaluate(uni,pt)) : pt in dpts];
+
+    // assert forall{d : d in decomps | #d eq 1 and d[1,2] eq 1};
+    minpols := [[MinimalPolynomial(Evaluate(uni,RepresentativePoint(dec[i,1]))) : 
+                    i in [1..#dec]] : dec in decomps];
+
+    charpols := [&*[minpols[j][i]^(decomps[j][i,2]*Degree(decomps[j][i,1]) div Degree(minpols[j][i]))  : 
+                 i in [1..#decomps[j]]] : j in [1..#decomps]];
+    // dpts := [* RepresentativePoint(d[1,1]) : d in decomps *];
+    // charpols := [MinimalPolynomial(Evaluate(uni,pt)) : pt in dpts];
     for charpol in charpols do
         coeffs_charpol := Coefficients(charpol);
         try
@@ -593,9 +599,9 @@ function ChooseGoodBasept(pts, p)
     pts_seq := [[pt[i]*d where d := LCM([Denominator(pt[j]) : j in [1..dim+1]]): i in [1..dim+1]] : pt in pts];
     pts_seq := [ChangeUniverse(pt, Integers()) : pt in pts_seq];
     for pt in pts_seq do
-        //if not IsWeierstrassPlace(Place(Cp!pt)) then
+        if not IsWeierstrassPlace(Place(Cp!pt)) then
             return C ! pt;
-        //end if;
+        end if;
     end for;
 
     error "There are no good base points to choose from :(";
