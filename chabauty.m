@@ -42,35 +42,25 @@ load "curve_ff.m";
 load "hyperelliptic.m";
 
 function GetClassGroupModp(C, p)
+    if IsArrayCached(C, "classgroup", p) then
+	return GetArrayCache(C, "classgroup", p);
+    end if;
+
     Cp := ReduceCurveModp(C,p);
     Clp, fromClp, toClp := ClassGroup(Cp);
 
-    return [*Clp, fromClp, toClp*];
+    ans := [*Clp, fromClp, toClp*];
+    SetArrayCache(C, "classgroup", p, ans);
+
+    return ans;
 end function;
 
 function GetClGrpProd(C, GoodPrimes)
-    // We cache the class group product in the curve C's attributes
-
-    if "ClGrpProd" in GetAttributes(Type(C)) and
-        assigned C`ClGrpProd and
-        IsDefined(C`ClGrpProd, GoodPrimes) then
-            return Explode(C`ClGrpProd[GoodPrimes]);
-    end if;
-
-    if not "ClGrpProd" in GetAttributes(Type(C)) then
-        AddAttribute(Type(C), "ClGrpProd");
-    end if;
-
-    if not assigned C`ClGrpProd then
-        C`ClGrpProd := AssociativeArray();
-    end if;
 
     ClgrpsWithMaps := [GetClassGroupModp(C,p) : p in GoodPrimes];
     Clgrps := [Cl[1] : Cl in ClgrpsWithMaps];
 
     Clprod, injs, projs := DirectProduct(Clgrps);
-
-    C`ClGrpProd[GoodPrimes] := [*Clprod, injs, projs*];
 
     return Clprod, injs, projs;
 end function;
