@@ -35,6 +35,7 @@ function CleanCurveEqs(C)
 end function;
 */ 
 
+load "cache.m";
 load "curve_funcs.m";
 load "point_funcs.m";
 load "curve_ff.m";
@@ -860,7 +861,7 @@ pAdicPrecision := 1;
 UseReduction := true;
 */
 function ChabautyColeman(C :
-                            HeightBound := 100000,
+                            HeightBound := 10000,
                             NumberOfGoodPrimes := 5,
                             GoodPrimes := [],
                             DiffForms := [],
