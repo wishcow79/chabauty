@@ -56,11 +56,17 @@ function GetClassGroupModp(C, p)
 end function;
 
 function GetClGrpProd(C, GoodPrimes)
+    if IsArrayCached(C, "cgprod", GoodPrimes) then
+        return Explode(GetArrayCache(C, "cgprod", GoodPrimes));
+    end if;
+
 
     ClgrpsWithMaps := [GetClassGroupModp(C,p) : p in GoodPrimes];
     Clgrps := [Cl[1] : Cl in ClgrpsWithMaps];
 
     Clprod, injs, projs := DirectProduct(Clgrps);
+
+    SetArrayCache(C, "cgprod", GoodPrimes, [*Clprod, injs, projs*]);
 
     return Clprod, injs, projs;
 end function;
