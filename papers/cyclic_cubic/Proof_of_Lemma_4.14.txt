@@ -1,0 +1,42 @@
+// This file contains the proof of Lemma {lem:curves_20}
+
+
+//What follows is a determination of the rational points of C_1
+
+QQ := RationalField();
+ZZ := IntegerRing();
+R<x> := PolynomialRing(QQ);
+z := x;
+A2<x,y> := AffineSpace(QQ,2); 
+
+//The following model is taken from https://math.mit.edu/~drew/X1/X1opt20.txt
+
+N:=20;
+X:=y^3 - x^3*y^2 - x^2*y + x;
+q:=(x - y)/(x*y - 1);
+t:= -4*x*(x-y)*(x*y-1)^2/(x^4*y^3 + 3*x^4*y - 10*x^3*y^2 - 2*x^3 + 4*x^2*y^3 + 8*x^2*y - 2*x*y^2 - 2*x - y^3 + y);
+E:=[0,t^2-2*q*t-2,0,-(t^2-1)*(q*t+1)^2,0];
+P:=[(t+1)*(q*t+1),t*(q*t+1)*(t+1)];
+g1 := Discriminant(X,x) div y^2;
+print g1;
+print Factorisation(g1);
+g1 := Evaluate(g1,[z,z]); 
+C1 := HyperellipticCurve(g1);
+pts := Points(C1 : Bound:= 1000);
+p:=-27*z^4+22*z^2+5;
+E:=HyperellipticCurve(p);
+epts:=Points(E:Bound:=100);
+epts;
+E2,f:=EllipticCurve(E);
+DescentInformation(E2);
+
+
+//What follows is the determination of the rational points on C_2
+
+K<t>:=PolynomialRing(Rationals());
+_<y>:=PolynomialRing(K);
+f2:=(y^3 - y)*t^3 + (-3*y^2 + 2*y + 1)*t^2 + (3*y^2 + 2*y - 1)*t - y^2 - 2*y - 1;
+d2:=Discriminant(f2);
+C2:=HyperellipticCurve(Numerator(d2/(4*t^2)));
+J:=Jacobian(C2);
+

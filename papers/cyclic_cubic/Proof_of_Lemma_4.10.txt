@@ -1,0 +1,123 @@
+//This is the proof of Lemma {lem:20_1}
+
+//X_1(20)
+QQ := Rationals();
+ZZ := Integers();
+R<x0,y0,z0>:=ProjectiveSpace(QQ,2);
+//The model mentioned in Lemma 2.8 obtained from https://math.mit.edu/~drew/X1/X1opt20.txt
+f0 := y0^3*z0^2 - x0^3*y0^2 - x0^2*y0*z0^2 + x0*z0^4;
+C := Curve(R, f0); 
+A<x,y> := FunctionField(C);
+pts := RationalPoints(C);
+pts := &cat[Places(i) : i in pts];
+[Degree(i) : i in pts];
+//pts is now equal to the set of rational cusps
+pts := [i : i in pts | Degree(i) eq 1];
+indices := [];
+pts2 := [P : P in Support(Divisor(C,x-y)) | Degree(P) eq 2] cat [P : P in Support(Divisor(C,x*y-1)) | Degree(P) eq 2];
+//pts2 are the three pairs of galois conjugate cusps of degree 2.
+for i:= 1 to 6 do
+    for j:= 1 to i do
+        for k:= 1 to j do
+            D:=pts[i]+pts[j]+pts[k];
+            V,f:=RiemannRochSpace(D);
+            if Dimension(V) ge 2 and (Degree(f(V.1)) eq 3 or Degree(f(V.2)) eq 3) then 
+                Append(~indices,SequenceToMultiset([i,j,k]));  
+            end if;
+        end for;
+    end for;
+end for;
+//indices is now the set effective divisors of degree 3 supported on the rational cusps giving a degree 3 function
+indices2 := [];
+for i:= 1 to 6 do
+    for j:= 1 to 3 do
+        D:=pts[i]+pts2[j];
+        V,f:=RiemannRochSpace(D);
+        if Dimension(V) ge 2 and (Degree(f(V.1)) eq 3 or Degree(f(V.2)) eq 3) then 
+            Append(~indices2,[i,j]);  
+        end if;
+    end for;
+end for; 
+
+Evaluate(f0,[x,y,1]);
+
+indices;indices2; 
+
+//This shows that all the divisors of degree 3 on X_1(20) supported on the cusps
+//and containing one degree 2 cusp is linearly equivalent to a sum of rational cusps
+for i2 in indices2 do
+    D2 := pts[i2[1]]+pts2[i2[2]];
+    is_duplicate := false;
+    for i in indices do
+        D := &+[pts[j] : j in i];
+        if IsPrincipal(D2-D) then
+            is_duplicate := true;
+            break;
+        end if;
+    end for;
+    if not is_duplicate then
+        print i2, " is bad!";
+    end if;
+end for;
+print "done"; 
+
+//this is how the automorphisms of X_1(20) act on the rational cusps
+G := Automorphisms(C);
+for f in G do
+    print [Index(pts,Support(Pullback(f,pts[i]))[1]) : i in [1..6]];
+end for; 
+
+phi := AutomorphismGroup(C).2;
+S6 := SymmetricGroup(6);
+G := PermutationGroup<6 | [Index(pts,Support(Pullback(phi,pts[i]))[1]) : i in [1..6]]>;
+assert #G eq 4;
+//G is now how the automorphism group on X_1(20) acts on the rational cusps via permutations 
+
+classes := [];
+for i in indices do
+    D := &+[pts[j] : j in i];
+    for c in [1..#classes] do
+        D1 := &+[pts[j] : j in classes[c][1]];
+        if Dimension(D-D1) gt 0 then
+            Include(~classes[c],i);
+            continue i;
+        end if;
+    end for;
+    Append(~classes,{@ i @});
+end for;
+classes := Seqset(classes);
+//classes is the set of indices grouped by linear equivalence 
+
+#classes;
+
+#Orbits(G,GSet(G,classes));
+//the diamond operators = G act on classes and these are the orbits. 
+
+Orbits(G,GSet(G,classes)); 
+
+//we list one function of degree 3 for each diamond orbit of classes
+for O in Orbits(G,GSet(G,classes)) do
+    print O;
+    //O1 := O[1];
+    for O1 in O do
+        print "function",#O1;
+        D1 := &+[pts[j] : j in O1[1]];
+        D2 := &+[pts[j] : j in O1[2]];
+        V,f := RiemannRochSpace(D1-D2);
+        g := f(V.1);
+        print "g:",g;
+        eq_g := MinimalPolynomial(g);
+        A0 := Parent(Coefficients(g)[1]);
+        f := eq_g*(A0 ! LCM([Denominator(c) : c in Coefficients(eq_g)]));
+        P := Parent(f);
+        AssignNames(~P, ["t"]);
+        print "minpol g:", f;
+        print "1/g:",1/g;
+        eq_g := MinimalPolynomial(1/g);
+        A0 := Parent(Coefficients(1/g)[1]);
+        f := eq_g*(A0 ! LCM([Denominator(c) : c in Coefficients(eq_g)]));
+        P := Parent(f);
+        AssignNames(~P, ["t"]);
+        print "minpol 1/g:", f;
+    end for;
+end for;  

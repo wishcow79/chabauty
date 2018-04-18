@@ -1,0 +1,69 @@
+//This file contains the magma computations needed for \label{thm:rat_pts} (Theorem 5.3 in the final version)
+//This code contains almost no explanation, for the explanation see
+//and these should be executed in the folder where https://github.com/wishcow79/chabauty is installed
+
+load "chabauty.m";
+
+//C2(16)
+R<t> := PolynomialRing(Rationals());
+F := t^8 - 12*t^7 + 54*t^6 - 112*t^5 + 97*t^4 - 32*t^3 + 4*t^2 - 4*t;
+C := HyperellipticCurve(F);
+D := C;
+assert TorsionBound(Jacobian(D),20) eq 3;
+gp := [5,11];
+pts := [D ! [1,1,0],D ! [0,0,1]];
+phi := MapJknownToClprod(D, pts, gp);
+assert Max(Invariants(Codomain(phi)))/Exponent(Image(phi)) eq 3;
+print [<p,[Factorization(i) : i in Invariants(GetClassGroupModp(D,p)[1]) | i gt 0]> : p in gp];
+assert Sort(&cat[Eltseq(i) : i in CptsToJknown(D,pts,5,gp : factor := 1, M := 11)]) eq
+       [ 0, 2, 2, 4, 4, 5, 5, 7, 7, 9, 10 ];
+assert Sort(&cat[Eltseq(i) : i in CptsToJknown(D,pts,11,gp : factor := 1, M := 22)]) eq
+       [ 0, 3, 10, 10, 17, 20, 21, 21 ];
+assert #Places(ReduceCurveModp(C,11),1) eq 3;
+ChabautyColeman(D : p:=5);
+
+
+
+//C3(16)
+R<t> := PolynomialRing(Rationals());
+F := t*(t^7 - 2*t^5 + 16*t^4 - 15*t^3 + 36*t^2 - 32*t + 4);
+C := HyperellipticCurve(F);
+D := C;
+assert TorsionBound(Jacobian(D),20) eq 3;
+gp := [3,17];
+pts := [D ! [1,1,0],D ! [0,0,1]];
+phi := MapJknownToClprod(D, pts, gp);
+assert Max(Invariants(Codomain(phi)))/Exponent(Image(phi)) eq 3;
+print [<p,[Factorization(i) : i in Invariants(GetClassGroupModp(D,p)[1]) | i gt 0]> : p in gp];
+assert Sort(&cat[Eltseq(i) : i in CptsToJknown(D,pts,3,gp : factor := 1, M := 2)]) eq [0,0,0];
+assert #Places(ReduceCurveModp(C,3),1) eq 5;
+ChabautyColeman(D : p:=3);
+
+
+
+
+//C2(20)
+R<t> := PolynomialRing(Rationals());
+F := t^10 - 6*t^9 + 15*t^8 - 32*t^7 + 51*t^6 - 54*t^5 + 65*t^4 - 64*t^3 + 24*t^2 - 4*t;
+C := HyperellipticCurve(F);
+D := C;
+assert TorsionBound(Jacobian(D),20) eq 3;
+gp := [3,37];
+pts := [D ! [1,1,0],D ! [0,0,1]];
+phi := MapJknownToClprod(D, pts, gp);
+assert Max(Invariants(Codomain(phi)))/Exponent(Image(phi)) eq 3;
+[<p,[Factorization(i) : i in Invariants(GetClassGroupModp(D,p)[1]) | i gt 0]> : p in gp];
+assert Sort(&cat[Eltseq(i) : i in CptsToJknown(D,pts,3,gp : factor := 1, M := 47)]) eq
+       [ 0, 19, 26, 45, 46 ];
+assert Sort(&cat[Eltseq(i) : i in CptsToJknown(D,pts,37,gp : factor := 1, M := 47)]) eq
+       [ 0, 1, 1, 1, 2, 2, 3, 3, 6, 6, 7, 9, 12, 14, 14, 16, 17, 18, 22, 23, 27, 28, 
+29, 31, 31, 33, 36, 38, 39, 39, 42, 42, 43, 43, 44, 44, 44, 45, 46 ];
+ChabautyColeman(D : p:=3);
+
+
+
+
+
+
+
+

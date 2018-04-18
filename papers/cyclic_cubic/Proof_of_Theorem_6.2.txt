@@ -1,0 +1,82 @@
+// This is the Proof of the theorem labeled {mainthm3} in the // paper
+
+
+
+// The next line proves the theorem for C_11, since for t=-1/10, the discriminant is positive
+
+K<t>:=FunctionField(Rationals());
+P<x>:=PolynomialRing(K);
+d:=Discriminant(x^3-x^2-t^2-t);
+t:=-1/10;
+assert Evaluate(d,t)ge 0;
+
+
+// The next line proves the theorem for C_13, since for t=-1/2, the discriminant is positive
+
+
+K<t>:=FunctionField(Rationals());
+P<x>:=PolynomialRing(K);
+d:=Discriminant(t*x^3-(t+1)*x^2+x+t^2-t);
+t:=-1/2;
+assert Evaluate(d,t)ge 0;
+
+
+
+// The next line proves the theorem for C_14, since for t=-5, the discriminant is positive
+K<t>:=FunctionField(Rationals());
+P<x>:=PolynomialRing(K);
+d:=Discriminant(x^3+x^2-8*x-t^2+16);
+t:=-5;
+assert Evaluate(d,t)ge 0;
+
+// The next line proves the theorem for C_15, since for t=1/5, the discriminant is positive
+
+K<t>:=FunctionField(Rationals());
+P<x>:=PolynomialRing(K);
+d:=Discriminant(x^3+x^2-t*x-t^2-t);
+t:=1/5;
+assert Evaluate(d,t)ge 0;
+
+// The next line proves the theorem for C_16, since the leading coefficient of the discriminant is positive
+K<t>:=FunctionField(Rationals());
+P<x>:=PolynomialRing(K);
+p:=2*t^2*x^3+(-2*t^2+2*t-1)*x^2+ (-t^2+1)*x+t^2-t;
+d:=Discriminant(p);
+
+// The next line proves the theorem for C_18, since the leading coefficient of the discriminant is positive
+
+K<t>:=FunctionField(Rationals());
+P<x>:=PolynomialRing(K);
+R<y>:=PolynomialRing(Rationals());
+p:=(-t+1)*x^3+(t^2-1)*x^2+(-2*t^2+t)*x+t^2-t;
+d:=Discriminant(p);
+
+// The next line proves the theorem for C_2xC_10, since the for t=0 the discriminant is positive
+
+
+K<t>:=FunctionField(Rationals());
+R<x>:=PolynomialRing(K);
+p:=8*x^3-8*x^2+1-t^2;
+d:=Discriminant(p);
+t:=1/5;
+assert Evaluate(d,t)ge 0;
+
+
+// The next line proves the theorem for C_2xC_12, since we find a number field K (totally real, but with Galois group S_3) over which X_1(2,12) has positive rank
+
+
+_<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([0,-1,0,1,0]);
+K:=NumberField(x^3 - x^2 - 3*x + 1);
+DescentInformation(ChangeRing(E,K));
+Discriminant(K);
+
+
+
+
+
+
+
+
+
+
